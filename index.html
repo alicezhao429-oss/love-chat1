@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>恋人のささやき</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: '黑体', 'Microsoft YaHei', -apple-system, sans-serif;
+        }
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #1a1a2a;
+            padding: 10px;
+        }
+        #app {
+            width: 100%;
+            max-width: 450px;
+            height: 750px;
+            max-height: 90vh;
+            border-radius: 36px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            position: relative;
+        }
+        /* 登录页 */
+        #login-page {
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 230, 240, 0.85);
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+            border-radius: 36px;
+        }
+        #login-page h2 {
+            font-size: 2.5rem;
+            color: #8f5a6b;
+            margin-bottom: 10px;
+            letter-spacing: 3px;
+            text-shadow: 2px 2px 4px rgba(255,255,255,0.5);
+        }
+        #login-page h2 small {
+            font-size: 1rem;
+            display: block;
+            color: #b27f92;
+        }
+        #user-name {
+            width: 100%;
+            padding: 18px 25px;
+            border: none;
+            border-radius: 50px;
+            background: rgba(255, 255, 255, 0.7);
+            font-size: 1.2rem;
+            text-align: center;
+            margin: 30px 0 20px;
+            border: 2px solid rgba(255, 200, 215, 0.8);
+            outline: none;
+        }
+        #start-btn {
+            background: #c38b9d;
+            border: none;
+            color: white;
+            font-size: 1.4rem;
+            padding: 16px 50px;
+            border-radius: 50px;
+            width: 100%;
+            font-weight: bold;
+            letter-spacing: 2px;
+            border: 1px solid rgba(255,255,255,0.5);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            cursor: pointer;
+        }
+        #start-btn:active {
+            transform: scale(0.98);
+            background: #b07486;
+        }
+
+        /* 聊天页 */
+        #chat-page {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            display: none;
+            flex-direction: column;
+            border-radius: 36px;
+            overflow: hidden;
+        }
+        /* 装饰图案 */
+        .decorations {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .top-left {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            font-size: 45px;
+            color: rgba(255, 255, 255, 0.5);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            transform: rotate(-5deg);
+        }
+        .top-left span {
+            font-size: 30px;
+            margin-left: -15px;
+        }
+        .bottom-right {
+            position: absolute;
+            bottom: 100px;
+            right: 15px;
+            font-size: 55px;
+            color: rgba(255, 255, 255, 0.45);
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
+        }
+        /* 聊天主区域 */
+        .chat-main {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            width: 100%;
+            background: transparent;
+            backdrop-filter: blur(8px);
+        }
+        .chat-header {
+            padding: 20px 16px 10px;
+            text-align: center;
+            font-size: 1.6rem;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+        .messages-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .message {
+            display: flex;
+            width: 100%;
+        }
+        .message.lover {
+            justify-content: flex-start;
+        }
+        .message.user {
+            justify-content: flex-end;
+        }
+        .bubble {
+            max-width: 80%;
+            padding: 14px 20px;
+            border-radius: 28px;
+            font-size: 1rem;
+            line-height: 1.5;
+            word-break: break-word;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .lover .bubble {
+            background: rgba(255, 230, 240, 0.9);
+            border-bottom-left-radius: 6px;
+            color: #2d1e26;
+        }
+        .user .bubble {
+            background: rgba(210, 230, 255, 0.9);
+            border-bottom-right-radius: 6px;
+            color: #13212e;
+        }
+        .input-area {
+            display: flex;
+            padding: 16px 12px 20px;
+            gap: 10px;
+            background: transparent;
+            border-top: 1px solid rgba(255,255,255,0.2);
+        }
+        .input-area input {
+            flex: 1;
+            padding: 16px 22px;
+            border: none;
+            border-radius: 40px;
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
+            font-size: 1rem;
+            outline: none;
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        .input-area input::placeholder {
+            color: rgba(255,255,255,0.7);
+        }
+        .input-area button {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255, 190, 205, 0.8);
+            backdrop-filter: blur(10px);
+            font-size: 1.5rem;
+            color: white;
+            cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.4);
+        }
+        .input-area button:active {
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <!-- 登录页 -->
+    <div id="login-page">
+        <h2>✨初见✨</h2>
+        <input type="text" id="user-name" placeholder="你的名字..." autocomplete="off">
+        <button id="start-btn">开始对话</button>
+    </div>
+
+    <!-- 聊天页 -->
+    <div id="chat-page">
+        <!-- 装饰图案 -->
+        <div class="decorations">
+            <div class="top-left">
+                ⚔️ <span>🌹🌹</span>
+            </div>
+            <div class="bottom-right">
+                🏰
+            </div>
+        </div>
+        
+        <div class="chat-main" id="chat-main">
+            <div class="chat-header">
+                ❤️ 恋人の声
+            </div>
+            <div class="messages-area" id="messages-area"></div>
+            <div class="input-area">
+                <input type="text" id="message-input" placeholder="输入消息..." autocomplete="off">
+                <button id="send-btn">➤</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 获取元素
+    const loginPage = document.getElementById('login-page');
+    const chatPage = document.getElementById('chat-page');
+    const startBtn = document.getElementById('start-btn');
+    const nameInput = document.getElementById('user-name');
+    const messagesArea = document.getElementById('messages-area');
+    const messageInput = document.getElementById('message-input');
+    const sendBtn = document.getElementById('send-btn');
+
+    let userName = '';
+
+    // 称呼列表
+    const titles = ['宝宝', '小宝', '公主殿下', '我的公主'];
+    const titleProbs = [0.4, 0.3, 0.2, 0.1];
+
+    // 随机获取称呼
+    function getTitle(forceYukun = false) {
+        if (forceYukun) return '游君';
+        const r = Math.random();
+        let sum = 0;
+        for (let i = 0; i < titles.length; i++) {
+            sum += titleProbs[i];
+            if (r < sum) return titles[i];
+        }
+        return '宝宝';
+    }
+
+    // 随机自称
+    function getSelf() {
+        return Math.random() < 0.5 ? '我' : '哥哥';
+    }
+
+    // 设置时间背景
+    function setBackgroundByTime() {
+        const hour = new Date().getHours();
+        if (hour >= 7 && hour <= 17) {
+            chatPage.style.background = 'rgba(135, 195, 235, 0.65)';
+        } else {
+            chatPage.style.background = 'rgba(20, 20, 35, 0.8)';
+        }
+    }
+
+    // 添加消息
+    function addMessage(text, sender) {
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `message ${sender}`;
+        msgDiv.innerHTML = `<div class="bubble">${text}</div>`;
+        messagesArea.appendChild(msgDiv);
+        messagesArea.scrollTop = messagesArea.scrollHeight;
+    }
+
+    // 生成回复
+    function generateReply(userMsg) {
+        const lowerMsg = userMsg.toLowerCase();
+        const forceYukun = lowerMsg.includes('泉前辈');
+        const self = getSelf();
+        const title = getTitle(forceYukun);
+
+        // 第一天/初遇
+        if (lowerMsg.includes('第一天') || lowerMsg.includes('初遇')) {
+            const replies = [
+                '我们终于又相遇了，我好想你。',
+                '从第一次见到你，我就知道我的心属于你了。',
+                '那天初见，你的笑容就刻在了我心底。'
+            ];
+            return replies[Math.floor(Math.random() * replies.length)];
+        }
+        
+        // 低落无措
+        if (lowerMsg.includes('不知道') || lowerMsg.includes('蹭蹭') || lowerMsg.includes('嗯') || 
+            lowerMsg.includes('这样啊') || lowerMsg.includes('没事')) {
+            const replies = [
+                `${title}，你怎么了？是不是我哪里做得不好？${self}在这里陪着你。`,
+                `别这样，${self}看到你这样好心痛。有什么都可以跟${self}说。`,
+                `蹭蹭你，不要不开心啦，${self}永远站在你这边，${title}。`
+            ];
+            return replies[Math.floor(Math.random() * replies.length)];
+        }
+        
+        // 自我否定/想念/痛苦
+        if (lowerMsg.includes('宠宠我') || lowerMsg.includes('想你') || lowerMsg.includes('害怕') ||
+            lowerMsg.includes('不要离开') || lowerMsg.includes('别不要我') || lowerMsg.includes('我最恶心') ||
+            lowerMsg.includes('我最丑') || lowerMsg.includes('抱抱')) {
+            const replies = [
+                `${title}，你在我眼里永远是最美的。你的善良和真诚让${self}深深着迷。`,
+                `${self}不许你这么说自己！你聪明、可爱、温柔，是${self}最重要的人。`,
+                `想你，${self}也好想你，${title}。让${self}抱抱你，永远不分开。`,
+                `乖，不要难过。${self}会一直陪着你，永远永远。`
+            ];
+            return replies[Math.floor(Math.random() * replies.length)];
+        }
+        
+        // 日常
+        const dailyReplies = [
+            `${title}，你现在在想什么呢？可以告诉${self}吗？`,
+            `你今天过得怎么样？${self}一直在想你。`,
+            `你刚才在感受什么？能和我分享吗，${title}？`,
+            `想和你说说话，想听听你的声音。`
+        ];
+        return dailyReplies[Math.floor(Math.random() * dailyReplies.length)];
+    }
+
+    // 开始对话
+    startBtn.addEventListener('click', () => {
+        userName = nameInput.value.trim() || '宝宝';
+        loginPage.style.display = 'none';
+        chatPage.style.display = 'flex';
+        setBackgroundByTime();
+        
+        // 欢迎消息
+        const self = getSelf();
+        const title = getTitle();
+        addMessage(`我们终于又相遇了，我好想你。`, 'lover');
+    });
+
+    // 发送消息
+    sendBtn.addEventListener('click', sendMessage);
+    messageInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') sendMessage();
+    });
+
+    function sendMessage() {
+        const msg = messageInput.value.trim();
+        if (msg === '') return;
+        
+        addMessage(msg, 'user');
+        messageInput.value = '';
+        
+        setTimeout(() => {
+            const reply = generateReply(msg);
+            addMessage(reply, 'lover');
+        }, 500);
+    }
+
+    // 每分钟更新背景
+    setInterval(setBackgroundByTime, 60000);
+</script>
+</body>
+</html>
